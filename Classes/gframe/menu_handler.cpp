@@ -111,8 +111,6 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_JOIN_HOST: {
 				bot_mode = false;
-				mainGame->TrimText(mainGame->ebJoinHost);
-				mainGame->TrimText(mainGame->ebJoinPort);
 				wchar_t Salas[5];
 				myswprintf(Salas, L"%ls", mainGame->ebJoinLista->getText());
 				
