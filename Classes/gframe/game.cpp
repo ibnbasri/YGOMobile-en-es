@@ -834,22 +834,22 @@ bool Game::Initialize() {
 		cbRace->addItem(dataManager.FormatRace(filter), filter);
 	env->addStaticText(dataManager.GetSysString(1322), rect<s32>(205 * xScale, 28 * yScale, 280 * xScale, 48 * yScale), false, false, wFilter);
 #ifdef _IRR_ANDROID_PLATFORM_
-	ebAttack = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(260 * xScale, 26 * yScale, 340 * xScale, 46 * yScale), wFilter);
+	ebAttack = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(260 * xScale, 26 * yScale, 340 * xScale, 46 * yScale), wFilter, EDITBOX_INPUTS);
 #endif
 	ebAttack->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	env->addStaticText(dataManager.GetSysString(1323), rect<s32>(205 * xScale, 51 * yScale, 280 * xScale, 71 * yScale), false, false, wFilter);
 #ifdef _IRR_ANDROID_PLATFORM_
-	ebDefense = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(260 * xScale, 49 * yScale, 340 * xScale, 69 * yScale), wFilter);
+	ebDefense = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(260 * xScale, 49 * yScale, 340 * xScale, 69 * yScale), wFilter, EDITBOX_INPUTS);
 #endif
 	ebDefense->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	env->addStaticText(dataManager.GetSysString(1324), rect<s32>(10 * xScale, 74 * yScale, 80 * xScale, 94 * yScale), false, false, wFilter);
 #ifdef _IRR_ANDROID_PLATFORM_
-	ebStar = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(60 * xScale, (60 + 100 / 6) * yScale, 100 * xScale, (80 + 100 / 6) * yScale), wFilter);
+	ebStar = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(60 * xScale, (60 + 100 / 6) * yScale, 100 * xScale, (80 + 100 / 6) * yScale), wFilter, EDITBOX_INPUTS);
 #endif
 	ebStar->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	env->addStaticText(dataManager.GetSysString(1336), rect<s32>(101 * xScale, (62 + 100 / 6) * yScale, 150 * xScale, (82 + 100 / 6) * yScale), false, false, wFilter);
 #ifdef _IRR_ANDROID_PLATFORM_
-	ebScale = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(150 * xScale, (60 + 100 / 6)  * yScale, 190 * xScale, (80 + 100 / 6) * yScale), wFilter);
+	ebScale = CAndroidGUIEditBox::addAndroidEditBox(L"", true, env, rect<s32>(150 * xScale, (60 + 100 / 6)  * yScale, 190 * xScale, (80 + 100 / 6) * yScale), wFilter, EDITBOX_INPUTS);
 #endif
 	ebScale->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	env->addStaticText(dataManager.GetSysString(1325), rect<s32>(205 * xScale, (62 + 100 / 6) * yScale, 280 * xScale, (82 + 100 / 6) * yScale), false, false, wFilter);
@@ -1348,11 +1348,11 @@ void Game::LoadExpansions() {
 		return;
 	while((dirp = readdir(dir)) != NULL) {
 		size_t len = strlen(dirp->d_name);
-		if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".zip") != 0)
+		if(len < 5 || strcasecmp(dirp->d_name + len - 4, ".zip") != 0 ||strcasecmp(dirp->d_name + len - 4, ".ypk") != 0)
 			continue;
 		char upath[1024];
 		sprintf(upath, "./expansions/%s", dirp->d_name);
-		dataManager.FileSystem->addFileArchive(upath, true, false);
+		dataManager.FileSystem->addFileArchive(upath, true, false, EFAT_ZIP);
 	}
 	closedir(dir);
 #endif

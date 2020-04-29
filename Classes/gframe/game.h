@@ -175,6 +175,13 @@ public:
 		return focus && focus->hasType(type);
 	}
 
+	void TrimText(irr::gui::IGUIElement* editbox) const {
+	    irr::core::stringw text(editbox->getText());
+	    text.trim();
+	    editbox->setText(text.c_str());
+	}
+
+
 	template<typename T>
 	static std::vector<T> TokenizeString(T input, const T& token);
 
@@ -786,6 +793,7 @@ private:
 #define BUTTON_MARKS_FILTER			322
 #define BUTTON_MARKERS_OK			323
 #define COMBOBOX_SORTTYPE			324
+#define EDITBOX_INPUTS				325
 
 #define WINDOW_DECK_MANAGE			330
 #define BUTTON_NEW_CATEGORY			331
