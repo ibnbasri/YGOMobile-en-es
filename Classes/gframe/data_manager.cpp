@@ -272,7 +272,7 @@ const wchar_t* DataManager::FormatAttribute(int attribute) {
 	int i = 1010;
 	for(; filter != 0x80; filter <<= 1, ++i) {
 		if(attribute & filter) {
-			BufferIO::CopyWStrRef(GetSysString(i), p, 16);
+			BufferIO::CopyWStrRef(GetSysString(i), p, 22);
 			*p = L'|';
 			*++p = 0;
 		}
@@ -289,7 +289,7 @@ const wchar_t* DataManager::FormatRace(int race) {
 	int i = 1020;
 	for(; filter != 0x2000000; filter <<= 1, ++i) {
 		if(race & filter) {
-			BufferIO::CopyWStrRef(GetSysString(i), p, 16);
+			BufferIO::CopyWStrRef(GetSysString(i), p, 22);
 			*p = L'|';
 			*++p = 0;
 		}
@@ -306,7 +306,7 @@ const wchar_t* DataManager::FormatType(int type) {
 	int i = 1050;
 	for(; filter != 0x8000000; filter <<= 1, ++i) {
 		if(type & filter) {
-			BufferIO::CopyWStrRef(GetSysString(i), p, 16);
+			BufferIO::CopyWStrRef(GetSysString(i), p, 22);
 			*p = L'|';
 			*++p = 0;
 		}
@@ -320,7 +320,7 @@ const wchar_t* DataManager::FormatType(int type) {
 const wchar_t* DataManager::FormatSetName(unsigned long long setcode) {
 	wchar_t* p = scBuffer;
 	for(int i = 0; i < 4; ++i) {
-		const wchar_t* setname = GetSetName((setcode >> i * 16) & 0xffff);
+		const wchar_t* setname = GetSetName((setcode >> i * 22) & 0xffff);
 		if(setname) {
 			BufferIO::CopyWStrRef(setname, p, 32);
 			*p = L'|';

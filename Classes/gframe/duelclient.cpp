@@ -36,8 +36,10 @@ mtrandom DuelClient::rnd;
 bool DuelClient::is_refreshing = false;
 int DuelClient::match_kill = 0;
 std::vector<HostPacket> DuelClient::hosts;
+std::vector<std::wstring> DuelClient::hosts_srvpro;
 std::set<unsigned int> DuelClient::remotes;
 event* DuelClient::resp_event = 0;
+bool DuelClient::is_srvpro = false;
 
 bool DuelClient::StartClient(unsigned int ip, unsigned short port, bool create_game) {
 	if(connect_state)
@@ -155,7 +157,27 @@ void DuelClient::ClientEvent(bufferevent *bev, short events, void *ctx) {
 			CTOS_JoinGame csjg;
 			csjg.version = PRO_VERSION;
 			csjg.gameid = 0;
-			BufferIO::CopyWStr(mainGame->ebJoinPass->getText(), csjg.pass, 20);
+			wchar_t Condicion[5];
+			myswprintf(Condicion, L"%ls", mainGame->ebJoinCondO->getText());
+			
+			if ( wcscmp(Condicion,L"1") == 0 ){
+				BufferIO::CopyWStr(mainGame->ebJoinPassO->getText(), csjg.pass, 20);
+			} else if ( wcscmp(Condicion,L"2") == 0) {
+				BufferIO::CopyWStr(L"L", csjg.pass, 20);
+			} else if ( wcscmp(Condicion,L"3") == 0) {
+				BufferIO::CopyWStr(L"AI", csjg.pass, 20);
+			} else if ( wcscmp(Condicion,L"4") == 0) {
+				BufferIO::CopyWStr(L"OO,M,R", csjg.pass, 20);
+				mainGame->stRanked->setText(L"OCG RANKED");
+			} else if ( wcscmp(Condicion,L"5") == 0) {
+				BufferIO::CopyWStr(L"TO,M,R", csjg.pass, 20);
+				mainGame->stRanked->setText(L"TCG RANKED");
+			} else {
+				BufferIO::CopyWStr(mainGame->ebJoinPass->getText(), csjg.pass, 20);
+			}
+			mainGame->ebJoinCondO->setText(L"0");
+			
+			//BufferIO::CopyWStr(mainGame->ebJoinPass->getText(), csjg.pass, 20);
 			SendPacketToServer(CTOS_JOIN_GAME, csjg);
 		}
 		bufferevent_enable(bev, EV_READ);
@@ -341,6 +363,106 @@ void DuelClient::HandleSTOCPacketLan(char* data, unsigned int len) {
 			break;
 		}
 		}
+		break;
+	}
+	case STOC_SRVPRO_ROOMLIST: {
+		is_srvpro = true;
+		mainGame->gMutex.lock();
+		mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::INFO);
+		mainGame->lstHostList->clear();
+		hosts_srvpro.clear();
+		unsigned short count = BufferIO::ReadUInt16(pdata);
+		char temp1[64];
+		char temp2[128];
+		for(unsigned short i = 0; i < count; ++i) {
+			wchar_t roomname[32];
+			wchar_t player1[64];
+			wchar_t player2[64];
+			wchar_t hoststr[1024];
+ 			memcpy(temp1, pdata, 64);
+			pdata += 64;
+			BufferIO::DecodeUTF8(temp1, roomname);
+ 			unsigned char room_status = BufferIO::ReadUInt8(pdata);
+			char room_duel_count = BufferIO::ReadInt8(pdata);
+			char room_turn_count = BufferIO::ReadInt8(pdata);
+ 			memcpy(temp2, pdata, 128);
+			pdata += 128;
+			BufferIO::DecodeUTF8(temp2, player1);
+ 			char player1_score = BufferIO::ReadInt8(pdata);
+			int player1_lp = BufferIO::ReadInt32(pdata);
+ 			memcpy(temp2, pdata, 128);
+			pdata += 128;
+			BufferIO::DecodeUTF8(temp2, player2);
+ 			char player2_score = BufferIO::ReadInt8(pdata);
+			int player2_lp = BufferIO::ReadInt32(pdata);
+ 			hosts_srvpro.push_back(std::wstring(roomname));
+			
+			wchar_t str[32];
+			myswprintf(str, L"%ls",roomname);
+			wchar_t* ptr;
+			wchar_t delim[] = L"#"; 
+			wchar_t* token = wcstok(str, delim, &ptr);
+			
+			wchar_t token2[40];
+			myswprintf(token2, L"%ls",token);
+			wchar_t token3[40];
+			
+			while (token) { 
+				myswprintf(token3, L"%ls",token);
+				token = wcstok(NULL, delim, &ptr); 
+			}
+			
+			if ( wcscmp(token2,token3) == 0 ){
+				myswprintf(token3, L" --- ");
+			}
+			
+			if ( wcscmp(token2,L"OO,S") == 0 ){
+				myswprintf(token2, L"  OCG  |  Cards: OCG  |  Mode: SINGLE  ");
+			} else if ( wcscmp(token2,L"OO,M") == 0) {
+				myswprintf(token2, L"  OCG  |  Cards: OCG  |  Mode: MATCH  ");
+			} else if ( wcscmp(token2,L"OO,T") == 0) {
+				myswprintf(token2, L"  OCG  |  Cards: OCG  |  Mode: TAG  ");
+			} else if ( wcscmp(token2,L"OO,OT,S") == 0) {
+				myswprintf(token2, L"  OCG  |  Cards: OCG/TCG  |  Mode: SINGLE  ");
+			} else if ( wcscmp(token2,L"OO,OT,M") == 0) {
+				myswprintf(token2, L"  OCG  |  Cards: OCG/TCG  |  Mode: MATCH  ");
+			} else if ( wcscmp(token2,L"OO,OT,T") == 0) {
+				myswprintf(token2, L"  OCG  |  Cards: OCG/TCG  |  Mode: TAG  ");
+			} else if ( wcscmp(token2,L"TO,S") == 0 ){
+				myswprintf(token2, L"  TCG  |  Cards: TCG  |  Mode: SINGLE  ");
+			} else if ( wcscmp(token2,L"TO,M") == 0) {
+				myswprintf(token2, L"  TCG  |  Cards: TCG  |  Mode: MATCH  ");
+			} else if ( wcscmp(token2,L"TO,T") == 0) {
+				myswprintf(token2, L"  TCG  |  Cards: TCG  |  Mode: TAG  ");
+			} else if ( wcscmp(token2,L"TO,OT,S") == 0) {
+				myswprintf(token2, L"  TCG  |  Cards: OCG/TCG  |  Mode: SINGLE  ");
+			} else if ( wcscmp(token2,L"TO,OT,M") == 0) {
+				myswprintf(token2, L"  TCG  |  Cards: OCG/TCG  |  Mode: MATCH  ");
+			} else if ( wcscmp(token2,L"TO,OT,T") == 0) {
+				myswprintf(token2, L"  TCG  |  Cards: OCG/TCG  |  Mode: TAG  ");
+			} else if ( wcscmp(token2,L"AI") == 0) {
+				myswprintf(token2, L"  AI  |  OCG/TCG  ");
+			} else{
+				myswprintf(token2, L" RANDOM ");
+			}
+			
+			switch(room_status) {
+				case 0: {
+					myswprintf(hoststr, L"Waiting  |%ls|  Room: %ls  |  %ls VS %ls", token2, token3, player1, player2);
+					break;
+				}
+				case 1: {
+					myswprintf(hoststr, L"Duel  |%ls|  Room: %ls  |  %ls VS %ls", token2, token3, player1, player2);
+					break;
+				}
+				case 2: {
+					myswprintf(hoststr, L"Siding  |%ls|  Room: %ls  |  %ls VS %ls", token2, token3, player1, player2);
+					break;
+				}
+			}
+			mainGame->lstHostList->addItem(hoststr);
+		}
+		mainGame->gMutex.unlock();
 		break;
 	}
 	case STOC_SELECT_HAND: {
@@ -4007,6 +4129,7 @@ void DuelClient::BeginRefreshHost() {
 	if(is_refreshing)
 		return;
 	is_refreshing = true;
+	DuelClient::is_srvpro = false;
 	mainGame->btnLanRefresh->setEnabled(false);
 	mainGame->lstHostList->clear();
 	remotes.clear();
