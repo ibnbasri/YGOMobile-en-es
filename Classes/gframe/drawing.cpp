@@ -266,12 +266,12 @@ void Game::DrawBackGround() {
 			selFieldAlpha = 205;
 			selFieldDAlpha = -10;
 		}
-		//S3DVertex v2[4];//fix the highlight grid
-		//SetS3DVertex(v2, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.001f, 1, 0, 0, 0, 0);//z(0.001f)
-		//matManager.mSelField.AmbientColor = 0xffffffff;
-		//matManager.mSelField.DiffuseColor = selFieldAlpha << 24;
-		//driver->setMaterial(matManager.mSelField);
-		//driver->drawVertexPrimitiveList(v2, 4, matManager.iRectangle, 2);
+		S3DVertex v2[4];//fix the highlight grid
+		SetS3DVertex(v2, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.001f, 1, 0, 0, 0, 0);//z(0.001f)
+		matManager.mSelField.AmbientColor = 0xffffffff;
+		matManager.mSelField.DiffuseColor = selFieldAlpha << 24;
+		driver->setMaterial(matManager.mSelField);
+		driver->drawVertexPrimitiveList(v2, 4, matManager.iRectangle, 2);
 	}
 }
 
@@ -285,23 +285,23 @@ void Game::DrawLinkedZones(ClientCard* pcard) {
 		if (mark & LINK_MARKER_LEFT && dField.hovered_sequence>0) {
 		vertex = matManager.vFieldMzone[dField.hovered_controler][dField.hovered_sequence - 1];
 		SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-		//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
         }
 		if (mark & LINK_MARKER_RIGHT && dField.hovered_sequence<4) {
 		vertex = matManager.vFieldMzone[dField.hovered_controler][dField.hovered_sequence + 1];
 		SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-		//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
 		}
 		if (dInfo.duel_rule >= 4) {
 		if ((mark & LINK_MARKER_TOP_LEFT && dField.hovered_sequence == 2) || (mark & LINK_MARKER_TOP && dField.hovered_sequence == 1) || (mark & LINK_MARKER_TOP_RIGHT && dField.hovered_sequence == 0)) {
 		vertex = matManager.vFieldMzone[dField.hovered_controler][5];
 		SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-		//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
 		}
 		if ((mark & LINK_MARKER_TOP_LEFT && dField.hovered_sequence == 4) || (mark & LINK_MARKER_TOP && dField.hovered_sequence == 3) || (mark & LINK_MARKER_TOP_RIGHT && dField.hovered_sequence == 2)) {
 		    vertex = matManager.vFieldMzone[dField.hovered_controler][6];
 			SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-			//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+			driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
 		}
 	}
 	} else {
@@ -309,32 +309,32 @@ void Game::DrawLinkedZones(ClientCard* pcard) {
 		if (mark & LINK_MARKER_BOTTOM_LEFT) {
 		vertex = matManager.vFieldMzone[dField.hovered_controler][0 + swap];
 		SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-		//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
 		}
 		if (mark & LINK_MARKER_BOTTOM) {
 		vertex = matManager.vFieldMzone[dField.hovered_controler][1 + swap];
 		SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-		//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
 		}
 		if (mark & LINK_MARKER_BOTTOM_RIGHT) {
 		vertex = matManager.vFieldMzone[dField.hovered_controler][2 + swap];
 		SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-		//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
 		}
 		if (mark & LINK_MARKER_TOP_LEFT) {
 		vertex = matManager.vFieldMzone[1 - dField.hovered_controler][4 - swap];
 		SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-		//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
 		}
 		if (mark & LINK_MARKER_TOP) {
 		vertex = matManager.vFieldMzone[1 - dField.hovered_controler][3 - swap];
 		SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-		//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
 		}
 		if (mark & LINK_MARKER_TOP_RIGHT) {
 		vertex = matManager.vFieldMzone[1 - dField.hovered_controler][2 - swap];
 		SetS3DVertex(vSelField, vertex[0].Pos.X, vertex[1].Pos.Y, vertex[3].Pos.X, vertex[2].Pos.Y, 0.01f, 1, 0, 0, 0, 0);
-		//driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
+		driver->drawVertexPrimitiveList(vSelField, 4, matManager.iRectangle, 2);
 		}
 	}
 }

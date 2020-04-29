@@ -346,25 +346,6 @@ public:
 	irr::gui::IGUIEditBox* ebRepStartTurn;
 	//single play
 	irr::gui::IGUIWindow* wSinglePlay;
-	//ygoproes
-	irr::gui::IGUIButton* btnIA;
-	irr::gui::IGUIButton* btnListRooms;
-	irr::gui::IGUIEditBox* ebJoinPassO;
-	irr::gui::IGUIEditBox* ebJoinCondO;
-	irr::gui::IGUIEditBox* ebJoinLista;
-	irr::gui::IGUIButton* btnJoinServer;
-	irr::gui::IGUIButton* btnCreateHostO;
-	irr::gui::IGUIComboBox* cbServer;
-	irr::gui::IGUIButton* btnOcgRanked;
-	irr::gui::IGUIButton* btnTcgRanked;
-	irr::gui::IGUIWindow* wCreateHostO;
-	irr::gui::IGUIComboBox* cbLFlistO;
-	irr::gui::IGUIComboBox* cbMatchModeO;
-	irr::gui::IGUIComboBox* cbRuleO;
-	irr::gui::IGUIEditBox* ebServerNameO;
-	irr::gui::IGUIButton* btnHostConfirmO;
-	irr::gui::IGUIButton* btnHostCancelO;
-	irr::gui::IGUIStaticText* stRanked;
 	//TEST BOT MODE
 	irr::gui::IGUIListBox* lstBotList;
 	irr::gui::IGUIStaticText* stBotInfo;
@@ -820,15 +801,6 @@ private:
 #define SCROLL_TAB_SYSTEM			371
 #define CHECKBOX_MULTI_KEYWORDS		372
 #define CHECKBOX_PREFER_EXPANSION	373
-
-#define BUTTON_HOST_CONFIRMO		374
-#define BUTTON_CREATE_HOSTO			375
-#define BUTTON_HOST_CANCELO			376
-#define BUTTON_IA					377
-#define BUTTON_LIST_ROOMS			378
-#define BUTTON_JOIN_SERVER			379
-#define BUTTON_OCG_RANKED			380
-#define BUTTON_TCG_RANKED			381
 
 #define DEFAULT_DUEL_RULE			5
 
