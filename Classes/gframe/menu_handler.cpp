@@ -74,8 +74,66 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ShowElement(mainGame->wLanWindow);
 				break;
 			}
+			case BUTTON_JOIN_SERVER: {
+				wchar_t Servidor[40];
+				myswprintf(Servidor, L"%ls", mainGame->cbServer->getText());
+				
+				if ( wcscmp(Servidor,L"Koishi Server TCG") == 0 ){
+					mainGame->ebJoinHost->setText(L"222.73.218.25");
+					mainGame->ebJoinPort->setText(L"1311");
+				} else if ( wcscmp(Servidor,L"Koishi Server OCG") == 0 ){
+					mainGame->ebJoinHost->setText(L"222.73.218.25");
+					mainGame->ebJoinPort->setText(L"7210");
+				} else if ( wcscmp(Servidor,L"SzefoServer TCG") == 0 ){
+					mainGame->ebJoinHost->setText(L"szefoserver.ddns.net");
+					mainGame->ebJoinPort->setText(L"7210");
+				} else if ( wcscmp(Servidor,L"Mercury233 Server OCG") == 0 ){
+					mainGame->ebJoinHost->setText(L"118.178.111.167");
+					mainGame->ebJoinPort->setText(L"233");
+				} else if ( wcscmp(Servidor,L"Mercury233 Server OCG Beta Cards") == 0 ){
+					mainGame->ebJoinHost->setText(L"118.178.111.167");
+					mainGame->ebJoinPort->setText(L"23333");
+				} else if ( wcscmp(Servidor,L"Terra Server") == 0 ){
+					mainGame->ebJoinHost->setText(L"23.254.201.48");
+					mainGame->ebJoinPort->setText(L"7911");
+				} else if ( wcscmp(Servidor,L"Moon Server") == 0 ){
+					mainGame->ebJoinHost->setText(L"23.254.201.48");
+					mainGame->ebJoinPort->setText(L"7999");
+				} else if ( wcscmp(Servidor,L"Korean Server") == 0 ){
+					mainGame->ebJoinHost->setText(L"cygopro.fun25.co.kr");
+					mainGame->ebJoinPort->setText(L"17225");
+				} else if ( wcscmp(Servidor,L"Nanahira Server") == 0 ){
+					mainGame->ebJoinHost->setText(L"213.159.202.230");
+					mainGame->ebJoinPort->setText(L"7210");
+				} 
+				
+				break;
+			}
 			case BUTTON_JOIN_HOST: {
 				bot_mode = false;
+				wchar_t Salas[5];
+				myswprintf(Salas, L"%ls", mainGame->ebJoinLista->getText());
+				
+				if ( wcscmp(Salas,L"1") == 0 ){
+					//mainGame->btnJoinHost->setText(L"1");
+					int sel = mainGame->lstHostList->getSelected();
+					if(sel == -1)
+						break;
+					int addr = DuelClient::hosts[sel].ipaddr;
+					int port = DuelClient::hosts[sel].port;
+					wchar_t buf[20];
+					myswprintf(buf, L"%d.%d.%d.%d", addr & 0xff, (addr >> 8) & 0xff, (addr >> 16) & 0xff, (addr >> 24) & 0xff);
+					mainGame->ebJoinHost->setText(buf);
+					myswprintf(buf, L"%d", port);
+					mainGame->ebJoinPort->setText(buf);
+					
+				} else if ( wcscmp(Salas,L"2") == 0) {
+					//mainGame->btnJoinHost->setText(L"2");
+					int sel = mainGame->lstHostList->getSelected();
+					if(sel != -1){
+						mainGame->ebJoinPass->setText(DuelClient::hosts_srvpro[sel].c_str());
+					}
+				}
 				char ip[20];
 				const wchar_t* pstr = mainGame->ebJoinHost->getText();
 				BufferIO::CopyWStr(pstr, ip, 16);
@@ -122,8 +180,187 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->device->closeDevice();
 				break;
 			}
+			case BUTTON_OCG_RANKED: {
+				mainGame->ebJoinCondO->setText(L"4");
+				
+				bot_mode = false;
+				char ip[20];
+				const wchar_t* pstr = mainGame->ebJoinHost->getText();
+				BufferIO::CopyWStr(pstr, ip, 16);
+				unsigned int remote_addr = htonl(inet_addr(ip));
+				if(remote_addr == -1) {
+					char hostname[100];
+					char port[6];
+					BufferIO::CopyWStr(pstr, hostname, 100);
+					BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), port, 6);
+					struct evutil_addrinfo hints;
+					struct evutil_addrinfo *answer = NULL;
+					memset(&hints, 0, sizeof(hints));
+					hints.ai_family = AF_INET;
+					hints.ai_socktype = SOCK_STREAM;
+					hints.ai_protocol = IPPROTO_TCP;
+					hints.ai_flags = EVUTIL_AI_ADDRCONFIG;
+					int status = evutil_getaddrinfo(hostname, port, &hints, &answer);
+					if(status != 0) {
+						mainGame->gMutex.lock();
+						mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::INFO);
+						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1412));
+						mainGame->gMutex.unlock();
+						break;
+					} else {
+						sockaddr_in * sin = ((struct sockaddr_in *)answer->ai_addr);
+						evutil_inet_ntop(AF_INET, &(sin->sin_addr), ip, 20);
+						remote_addr = htonl(inet_addr(ip));
+					}
+				}
+				unsigned int remote_port = _wtoi(mainGame->ebJoinPort->getText());
+				BufferIO::CopyWStr(pstr, mainGame->gameConf.lasthost, 100);
+				BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), mainGame->gameConf.lastport, 20);
+				if(DuelClient::StartClient(remote_addr, remote_port, false)) {
+					mainGame->btnCreateHostO->setEnabled(true);
+					mainGame->btnJoinHost->setEnabled(true);
+					mainGame->btnJoinCancel->setEnabled(true);
+					mainGame->HideElement(mainGame->wCreateHostO);
+				}	
+				break;
+			}
+			case BUTTON_TCG_RANKED: {
+				mainGame->ebJoinCondO->setText(L"5");
+				
+				bot_mode = false;
+				char ip[20];
+				const wchar_t* pstr = mainGame->ebJoinHost->getText();
+				BufferIO::CopyWStr(pstr, ip, 16);
+				unsigned int remote_addr = htonl(inet_addr(ip));
+				if(remote_addr == -1) {
+					char hostname[100];
+					char port[6];
+					BufferIO::CopyWStr(pstr, hostname, 100);
+					BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), port, 6);
+					struct evutil_addrinfo hints;
+					struct evutil_addrinfo *answer = NULL;
+					memset(&hints, 0, sizeof(hints));
+					hints.ai_family = AF_INET;
+					hints.ai_socktype = SOCK_STREAM;
+					hints.ai_protocol = IPPROTO_TCP;
+					hints.ai_flags = EVUTIL_AI_ADDRCONFIG;
+					int status = evutil_getaddrinfo(hostname, port, &hints, &answer);
+					if(status != 0) {
+						mainGame->gMutex.lock();
+						mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::INFO);
+						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1412));
+						mainGame->gMutex.unlock();
+						break;
+					} else {
+						sockaddr_in * sin = ((struct sockaddr_in *)answer->ai_addr);
+						evutil_inet_ntop(AF_INET, &(sin->sin_addr), ip, 20);
+						remote_addr = htonl(inet_addr(ip));
+					}
+				}
+				unsigned int remote_port = _wtoi(mainGame->ebJoinPort->getText());
+				BufferIO::CopyWStr(pstr, mainGame->gameConf.lasthost, 100);
+				BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), mainGame->gameConf.lastport, 20);
+				if(DuelClient::StartClient(remote_addr, remote_port, false)) {
+					mainGame->btnCreateHostO->setEnabled(true);
+					mainGame->btnJoinHost->setEnabled(true);
+					mainGame->btnJoinCancel->setEnabled(true);
+					mainGame->HideElement(mainGame->wCreateHostO);
+				}	
+				break;
+			}
 			case BUTTON_LAN_REFRESH: {
+				mainGame->ebJoinLista->setText(L"1");
+				DuelClient::is_srvpro = false;
 				DuelClient::BeginRefreshHost();
+				break;
+			}
+			case BUTTON_IA: {
+				mainGame->ebJoinCondO->setText(L"3");
+				
+				bot_mode = false;
+				char ip[20];
+				const wchar_t* pstr = mainGame->ebJoinHost->getText();
+				BufferIO::CopyWStr(pstr, ip, 16);
+				unsigned int remote_addr = htonl(inet_addr(ip));
+				if(remote_addr == -1) {
+					char hostname[100];
+					char port[6];
+					BufferIO::CopyWStr(pstr, hostname, 100);
+					BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), port, 6);
+					struct evutil_addrinfo hints;
+					struct evutil_addrinfo *answer = NULL;
+					memset(&hints, 0, sizeof(hints));
+					hints.ai_family = AF_INET;
+					hints.ai_socktype = SOCK_STREAM;
+					hints.ai_protocol = IPPROTO_TCP;
+					hints.ai_flags = EVUTIL_AI_ADDRCONFIG;
+					int status = evutil_getaddrinfo(hostname, port, &hints, &answer);
+					if(status != 0) {
+						mainGame->gMutex.lock();
+						mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::INFO);
+						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1412));
+						mainGame->gMutex.unlock();
+						break;
+					} else {
+						sockaddr_in * sin = ((struct sockaddr_in *)answer->ai_addr);
+						evutil_inet_ntop(AF_INET, &(sin->sin_addr), ip, 20);
+						remote_addr = htonl(inet_addr(ip));
+					}
+				}
+				unsigned int remote_port = _wtoi(mainGame->ebJoinPort->getText());
+				BufferIO::CopyWStr(pstr, mainGame->gameConf.lasthost, 100);
+				BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), mainGame->gameConf.lastport, 20);
+				if(DuelClient::StartClient(remote_addr, remote_port, false)) {
+					mainGame->btnCreateHostO->setEnabled(true);
+					mainGame->btnJoinHost->setEnabled(true);
+					mainGame->btnJoinCancel->setEnabled(true);
+					mainGame->HideElement(mainGame->wCreateHostO);
+				}	
+				break;
+			}
+			case BUTTON_LIST_ROOMS: {
+				mainGame->ebJoinCondO->setText(L"2");
+				mainGame->ebJoinLista->setText(L"2");
+				
+				bot_mode = false;
+				char ip[20];
+				const wchar_t* pstr = mainGame->ebJoinHost->getText();
+				BufferIO::CopyWStr(pstr, ip, 16);
+				unsigned int remote_addr = htonl(inet_addr(ip));
+				if(remote_addr == -1) {
+					char hostname[100];
+					char port[6];
+					BufferIO::CopyWStr(pstr, hostname, 100);
+					BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), port, 6);
+					struct evutil_addrinfo hints;
+					struct evutil_addrinfo *answer = NULL;
+					memset(&hints, 0, sizeof(hints));
+					hints.ai_family = AF_INET;
+					hints.ai_socktype = SOCK_STREAM;
+					hints.ai_protocol = IPPROTO_TCP;
+					hints.ai_flags = EVUTIL_AI_ADDRCONFIG;
+					int status = evutil_getaddrinfo(hostname, port, &hints, &answer);
+					if(status != 0) {
+						mainGame->gMutex.lock();
+						mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::INFO);
+						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1412));
+						mainGame->gMutex.unlock();
+						break;
+					} else {
+						sockaddr_in * sin = ((struct sockaddr_in *)answer->ai_addr);
+						evutil_inet_ntop(AF_INET, &(sin->sin_addr), ip, 20);
+						remote_addr = htonl(inet_addr(ip));
+					}
+				}
+				unsigned int remote_port = _wtoi(mainGame->ebJoinPort->getText());
+				BufferIO::CopyWStr(pstr, mainGame->gameConf.lasthost, 100);
+				BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), mainGame->gameConf.lastport, 20);
+				if(DuelClient::StartClient(remote_addr, remote_port, false)) {
+					mainGame->btnCreateHostO->setEnabled(true);
+					mainGame->btnJoinHost->setEnabled(true);
+					mainGame->btnJoinCancel->setEnabled(true);
+					mainGame->HideElement(mainGame->wCreateHostO);
+				}	
 				break;
 			}
 			case BUTTON_CREATE_HOST: {
@@ -131,6 +368,13 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->btnHostCancel->setEnabled(true);
 				mainGame->HideElement(mainGame->wLanWindow);
 				mainGame->ShowElement(mainGame->wCreateHost);
+				break;
+			}
+			case BUTTON_CREATE_HOSTO: {
+				mainGame->btnHostConfirmO->setEnabled(true);
+				mainGame->btnHostCancelO->setEnabled(true);
+				mainGame->HideElement(mainGame->wLanWindow);
+				mainGame->ShowElement(mainGame->wCreateHostO);
 				break;
 			}
 			case BUTTON_HOST_CONFIRM: {
@@ -146,11 +390,112 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->btnHostCancel->setEnabled(false);
 				break;
 			}
+			case BUTTON_HOST_CONFIRMO: {
+				wchar_t texto[20];
+				wchar_t Formato[5];
+				wchar_t Cartas[5];
+				wchar_t Modo[5];
+				
+				wchar_t ES_FORMATO[5];
+				myswprintf(ES_FORMATO, L"%ls", mainGame->cbLFlistO->getText());
+				wchar_t ES_CARTAS[10];
+				myswprintf(ES_CARTAS, L"%ls", mainGame->cbRuleO->getText());
+				wchar_t ES_MODO[10];
+				myswprintf(ES_MODO, L"%ls", mainGame->cbMatchModeO->getText());
+				
+				wchar_t ES_OCG[5];
+				wchar_t ES_TCG[5];
+				myswprintf(ES_OCG, L"OCG");
+				myswprintf(ES_TCG, L"TCG");
+				
+				wchar_t ES_OCGTCG[10];
+				myswprintf(ES_OCGTCG, L"OCG/TCG");
+				
+				wchar_t ES_MATCH[10];
+				wchar_t ES_TAG[10];
+				myswprintf(ES_MATCH, L"Match");
+				myswprintf(ES_TAG, L"Tag");
+				
+				if ( wcscmp(ES_FORMATO,ES_OCG) == 0 ){
+					myswprintf(Formato, L"OO");
+				} else {
+					myswprintf(Formato, L"TO");
+				}
+				
+				if ( wcscmp(ES_CARTAS,ES_OCGTCG) == 0 ){
+					myswprintf(Cartas, L",OT");
+				} else {
+					myswprintf(Cartas, L"");
+				}
+				
+				if ( wcscmp(ES_MODO,ES_MATCH) == 0 ){
+					myswprintf(Modo, L",M");
+				} else if ( wcscmp(ES_MODO,ES_TAG) == 0) {
+					myswprintf(Modo, L",T");
+				} else {
+					myswprintf(Modo, L",S");
+				}
+				
+				myswprintf(texto, L"%ls%ls%ls#%ls", Formato, Cartas, Modo, mainGame->ebServerNameO->getText());
+
+				mainGame->ebJoinCondO->setText(L"1");
+				mainGame->ebJoinPassO->setText(texto);
+				
+				bot_mode = false;
+				char ip[20];
+				const wchar_t* pstr = mainGame->ebJoinHost->getText();
+				BufferIO::CopyWStr(pstr, ip, 16);
+				unsigned int remote_addr = htonl(inet_addr(ip));
+				if(remote_addr == -1) {
+					char hostname[100];
+					char port[6];
+					BufferIO::CopyWStr(pstr, hostname, 100);
+					BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), port, 6);
+					struct evutil_addrinfo hints;
+					struct evutil_addrinfo *answer = NULL;
+					memset(&hints, 0, sizeof(hints));
+					hints.ai_family = AF_INET;
+					hints.ai_socktype = SOCK_STREAM;
+					hints.ai_protocol = IPPROTO_TCP;
+					hints.ai_flags = EVUTIL_AI_ADDRCONFIG;
+					int status = evutil_getaddrinfo(hostname, port, &hints, &answer);
+					if(status != 0) {
+						mainGame->gMutex.lock();
+						mainGame->soundManager->PlaySoundEffect(SoundManager::SFX::INFO);
+						mainGame->env->addMessageBox(L"", dataManager.GetSysString(1412));
+						mainGame->gMutex.unlock();
+						break;
+					} else {
+						sockaddr_in * sin = ((struct sockaddr_in *)answer->ai_addr);
+						evutil_inet_ntop(AF_INET, &(sin->sin_addr), ip, 20);
+						remote_addr = htonl(inet_addr(ip));
+					}
+				}
+				unsigned int remote_port = _wtoi(mainGame->ebJoinPort->getText());
+				BufferIO::CopyWStr(pstr, mainGame->gameConf.lasthost, 100);
+				BufferIO::CopyWStr(mainGame->ebJoinPort->getText(), mainGame->gameConf.lastport, 20);
+				if(DuelClient::StartClient(remote_addr, remote_port, false)) {
+					mainGame->btnCreateHostO->setEnabled(true);
+					mainGame->btnJoinHost->setEnabled(true);
+					mainGame->btnJoinCancel->setEnabled(true);
+					mainGame->HideElement(mainGame->wCreateHostO);
+				}	
+				
+				break;
+			}
 			case BUTTON_HOST_CANCEL: {
 				mainGame->btnCreateHost->setEnabled(true);
 				mainGame->btnJoinHost->setEnabled(true);
 				mainGame->btnJoinCancel->setEnabled(true);
 				mainGame->HideElement(mainGame->wCreateHost);
+				mainGame->ShowElement(mainGame->wLanWindow);
+				break;
+			}
+			case BUTTON_HOST_CANCELO: {
+				mainGame->btnCreateHostO->setEnabled(true);
+				mainGame->btnJoinHost->setEnabled(true);
+				mainGame->btnJoinCancel->setEnabled(true);
+				mainGame->HideElement(mainGame->wCreateHostO);
 				mainGame->ShowElement(mainGame->wLanWindow);
 				break;
 			}
@@ -194,10 +539,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_HP_START: {
 				DuelClient::SendPacketToServer(CTOS_HS_START);
+				mainGame->stRanked->setText(L"");
 				break;
 			}
 			case BUTTON_HP_CANCEL: {
 				DuelClient::StopClient();
+				mainGame->stRanked->setText(L"");
 				mainGame->btnCreateHost->setEnabled(true);
 				mainGame->btnJoinHost->setEnabled(true);
 				mainGame->btnJoinCancel->setEnabled(true);
@@ -463,16 +810,20 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 		case irr::gui::EGET_LISTBOX_CHANGED: {
 			switch(id) {
 			case LISTBOX_LAN_HOST: {
-				int sel = mainGame->lstHostList->getSelected();
-				if(sel == -1)
-					break;
-				int addr = DuelClient::hosts[sel].ipaddr;
-				int port = DuelClient::hosts[sel].port;
-				wchar_t buf[20];
-				myswprintf(buf, L"%d.%d.%d.%d", addr & 0xff, (addr >> 8) & 0xff, (addr >> 16) & 0xff, (addr >> 24) & 0xff);
-				mainGame->ebJoinHost->setText(buf);
-				myswprintf(buf, L"%d", port);
-				mainGame->ebJoinPort->setText(buf);
+				// int sel = mainGame->lstHostList->getSelected();
+				// if(sel == -1)
+					// break;
+				// if(DuelClient::is_srvpro) {
+					////mainGame->ebJoinPass->setText(DuelClient::hosts_srvpro[sel].c_str());
+					// break;
+				// }
+				// int addr = DuelClient::hosts[sel].ipaddr;
+				// int port = DuelClient::hosts[sel].port;
+				// wchar_t buf[20];
+				// myswprintf(buf, L"%d.%d.%d.%d", addr & 0xff, (addr >> 8) & 0xff, (addr >> 16) & 0xff, (addr >> 24) & 0xff);
+				// mainGame->ebJoinHost->setText(buf);
+				// myswprintf(buf, L"%d", port);
+				// mainGame->ebJoinPort->setText(buf);
 				break;
 			}
 			case LISTBOX_REPLAY_LIST: {
@@ -565,10 +916,6 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 		}
 		case irr::gui::EGET_COMBO_BOX_CHANGED: {
 			switch(id) {
-			case COMBOBOX_BOT_RULE: {
-				mainGame->RefreshBot();
-				break;
-			}
 			case COMBOBOX_HP_CATEGORY: {
 				int catesel = mainGame->cbCategorySelect->getSelected();
 				if(catesel == 3) {
@@ -579,6 +926,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->RefreshDeck(mainGame->cbCategorySelect, mainGame->cbDeckSelect);
 					mainGame->cbDeckSelect->setSelected(0);
 				}
+				break;
+			}
+			case COMBOBOX_BOT_RULE: {
+				mainGame->RefreshBot();
 				break;
 			}
 			}
