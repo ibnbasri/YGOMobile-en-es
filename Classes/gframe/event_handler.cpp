@@ -2091,7 +2091,11 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 	        }
 	        case irr::EMIE_LMOUSE_LEFT_UP: {
                 if (root->getElementFromPoint(mousepos) == mainGame->stText ||
-                    root->getElementFromPoint(mousepos) == mainGame->wHostPrepare) {
+                    root->getElementFromPoint(mousepos) == mainGame->wHostPrepare ||
+                    root->getElementFromPoint(mousepos) == mainGame->imgCard ||
+                    root->getElementFromPoint(mousepos) == mainGame->wReplay ||
+                    root->getElementFromPoint(mousepos) == mainGame->wSinglePlay ||
+                    root->getElementFromPoint(mousepos) == mainGame->wLanWindow) {
                     mainGame->gMutex.lock();
                     mainGame->textFont->setTransparency(true);
                     mainGame->ClearChatMsg();
@@ -2131,7 +2135,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event) {
 	                if(pos < 0) pos = 0;
 	                if(pos > max) pos = max;
 	                mainGame->scrCardText->setPos(pos);
-	                mainGame->SetStaticText(mainGame->stText, mainGame->stText->getRelativePosition().getWidth() - 25, mainGame->guiFont, mainGame->showingtext, pos);
+	                mainGame->SetStaticText(mainGame->stText, mainGame->stText->getRelativePosition().getWidth(), mainGame->guiFont, mainGame->showingtext, pos);
 	            }
                 if(is_dragging_lstLog) {
                     if(!mainGame->lstLog->getVerticalScrollBar()->isVisible()) {
